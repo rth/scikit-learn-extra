@@ -508,8 +508,8 @@ class Fastfood(BaseEstimator, TransformerMixin):
     significant speed and storage advantages.  The computational complexity for
     mapping a single example is O(n_components log d).  The space complexity is
     O(n_components).  Hint: n_components should be a power of two. If this is
-    not the case, the next higher number that fulfills this contraint is chosen
-    automatically.
+    not the case, the next higher number that fulfills this constraint is
+    chosen automatically.
 
     Parameters
     ----------
@@ -637,7 +637,7 @@ class Fastfood(BaseEstimator, TransformerMixin):
         self : object
             Returns the transformer.
         """
-        X = array2d(X)
+        X = check_array(X)
 
         d_orig = X.shape[1]
 
@@ -672,7 +672,7 @@ class Fastfood(BaseEstimator, TransformerMixin):
         -------
         X_new : array-like, shape (n_samples, n_components)
         """
-        X = array2d(X)
+        X = check_array(X)
         X_padded = self.pad_with_zeros(X)
         HGPHBX = self.apply_approximate_gaussian_matrix(self.B,
                                                         self.G,
