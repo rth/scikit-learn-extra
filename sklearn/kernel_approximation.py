@@ -14,6 +14,7 @@ import scipy.sparse as sp
 from sklearn.utils.cyfht import fht2 as cyfht
 from scipy.linalg import svd
 from scipy.stats import chi
+from utils.random import choice
 
 from .base import BaseEstimator
 from .base import TransformerMixin
@@ -585,6 +586,10 @@ class Fastfood(BaseEstimator, TransformerMixin):
     def approx_fourier_transformation_multi_dim(result):
         cyfht(result)
 
+    @staticmethod
+    def l2norm_along_axis1(X):
+        return np.sqrt(np.einsum('ij,ij->i', X, X))
+
     def uniform_vector(self):
         if self.tradeoff_mem_accuracy != 'accuracy':
             return self.rng.uniform(0, 2 * np.pi, size=self.n)
@@ -648,10 +653,13 @@ class Fastfood(BaseEstimator, TransformerMixin):
         self.number_of_features_to_pad_with_zeros = self.d - d_orig
 
         self.G = self.rng.normal(size=(self.times_to_stack_v, self.d))
-        self.B = self.rng.choice([-1, 1], size=(self.times_to_stack_v, self.d))
+        self.B = choice([-1, 1],
+                        size=(self.times_to_stack_v, self.d),
+                        replace=True,
+                        random_state=self.random_state)
         self.P = np.hstack([(i*self.d)+self.rng.permutation(self.d)
                             for i in range(self.times_to_stack_v)])
-        self.S = np.multiply(1 / np.linalg.norm(self.G, axis=1)
+        self.S = np.multiply(1 / self.l2norm_along_axis1(self.G)
                              .reshape((-1, 1)),
                              chi.rvs(self.d,
                                      size=(self.times_to_stack_v, self.d)))
